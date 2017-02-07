@@ -5,9 +5,12 @@ Ruby plugin for Sketchup 8 Pro or above for making unique selected components de
 USING
 ---------
 Right click on component and/or group, or selected components and groups, and "Make Unique Plus". It has two submenus:
+
 1. **_Only parent level_** - This will make unique all selected components without their nested levels. Any report or message are absent.
 2. **_Choose nested level..._** - This will make unique all selected components and their nested selected levels components.
+
 You can choose nested level from list. 2 level is parent. Report has three understandable options: 
+
     * *Off*
     * *Short in messagebox*
     * *Full in console*
