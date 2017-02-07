@@ -176,6 +176,10 @@ module YorikTools::MakeUniquePlus
     when "Short in messagebox"
       UI.messagebox("#{total_count.length} component(s) were made unique")
     when "Full in console"
+      su_version_required = 14
+      if Sketchup.version.to_f >= su_version_required
+        SKETCHUP_CONSOLE.show if !SKETCHUP_CONSOLE.visible?
+      end
       puts "========================================"
       puts "#{total_count.length} component(s) were made unique"
       puts "========================================"
