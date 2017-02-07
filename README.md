@@ -11,9 +11,9 @@ Right click on component and/or group, or selected components and groups, and "M
 
 You can choose nested level from list. 2 level is parent. Report has three understandable options: 
 
-    * *Off*
-    * *Short in messagebox*
-    * *Full in console*
+  * *Off*
+  * *Short in messagebox*
+  * *Full in console*
 
 You can see more tutorial on [YouTube](https://youtu.be/Ej6fQ37A84o)
 
