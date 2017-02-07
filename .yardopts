@@ -1,0 +1,8 @@
+Plugins/*/*.rb
+Plugins/*.rb
+--markup-provider=redcarpet
+--markup=markdown
+--readme README.md
+-
+HISTORY.md
+

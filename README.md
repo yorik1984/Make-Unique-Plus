@@ -52,6 +52,11 @@ Using parts of source code of honoluludesktop:
 * [Sketchucation profile](http://sketchucation.com/forums/memberlist.php?mode=viewprofile&u=11169)
 * [Sketchucation forum topic](http://sketchucation.com/forums/viewtopic.php?p=346107#p346107)
 
+DEVELOPMENT
+-----------
+More information about source code see in **_doc/_** folder 
+
+
 DONATION
 --------
 If this plugin help you modelling more fast, you can give me a cookies :=) 
