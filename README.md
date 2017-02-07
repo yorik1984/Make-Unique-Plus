@@ -15,6 +15,8 @@ You can choose nested level from list. 2 level is parent. Report has three under
   * *Short in messagebox*
   * *Full in console*
 
+**NOTE**. In SketchUp version 2014 or above console will be open automatically if it not opened yet. In other case you must open via *Window > Ruby Console* 
+
 You can see more tutorial on [YouTube](https://youtu.be/Ej6fQ37A84o)
 
 CHANGELOG
