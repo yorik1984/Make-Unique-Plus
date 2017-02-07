@@ -33,7 +33,7 @@ build-iPhoneSimulator/
 #.yardopts
 /.yardoc/
 /_yardoc/
-/doc
+#/doc
 /rdoc
 
 ## Environment normalization:
