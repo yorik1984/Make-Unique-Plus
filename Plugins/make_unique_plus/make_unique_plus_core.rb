@@ -117,8 +117,9 @@ module YorikTools::MakeUniquePlus
   #
   # @param selection [Sketchup::Selection] Selected components of the model
   # @param nested_level [Numeric] maximum nested level for collecting components
-  # @param components_list [Array] empty array before start for doing collection
   # @param current_nested_level [Numeric] nested level of current entity
+  # @param parent_list [Array] empty array before start for doing collection
+  # @param components_list [Array] empty array before start for doing collection
   #
   # @return [Array] collection of unique components
   # @see nested_level
@@ -126,12 +127,12 @@ module YorikTools::MakeUniquePlus
   def self.collect_uniq_components(selection,
                                    nested_level,
                                    current_nested_level = 2,
+                                   parent_list = [],
                                    components_list = [])
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
-      if current_nested_level <= nested_level &&
-        entity.is_a?(Sketchup::ComponentInstance)
+      if current_nested_level <= nested_level && entity.is_a?(Sketchup::ComponentInstance)
         separator = "  "
         if current_nested_level > 2
           for i in 3..current_nested_level
@@ -141,20 +142,24 @@ module YorikTools::MakeUniquePlus
         components_list_row_tmp = ""
         level = current_nested_level.to_s + separator
         original_component_name = "#{entity.definition.name}"
-        entity.make_unique
+        entity = entity.make_unique
         unique_component_name = "#{entity.definition.name}"
         if original_component_name != unique_component_name
           components_list.push("#{level[0,3]}#{separator} " +
               original_component_name + " => " +  unique_component_name)
+
         else
           components_list.push("#{level[0,3]}#{separator} " +
               original_component_name + " => " +  "NO CHANGE")
         end
-
+      end
+      if parent_list != [] && parent_list.include?(entity)
+        current_nested_level += 1
+        next
       end
       components_list =
-          self.collect_uniq_components(definition.entities, nested_level,
-              current_nested_level + 1, components_list)
+          self.collect_uniq_components(entity.definition.entities, nested_level,
+              current_nested_level + 1, parent_list, components_list)
     end
     return components_list
   end # collect_uniq_components
@@ -168,10 +173,22 @@ module YorikTools::MakeUniquePlus
     make_unique_inputbox = LevelInputbox.new
     input = make_unique_inputbox.inputbox(selection, parent_level)
     model = Sketchup.active_model
+    active_path = model.active_path || []
     status = model.start_operation('Make unique', true)
     nested_level = input[:recursive].to_i
     report = input[:report].to_s
-    total_count = self.collect_uniq_components(selection, nested_level)
+    up_level = 0
+    if active_path == []
+       total_count = self.collect_uniq_components(selection, nested_level)
+    else
+      up_level = active_path.size
+      selected = selection.find_all{ |sel| !self.get_definition(sel).nil? }
+      active_path_parent = []
+      active_path_parent = active_path
+      full_list = active_path_parent + selected
+      up_level.times { model.close_active }
+      total_count = self.collect_uniq_components(full_list, nested_level + up_level, 2, active_path)
+    end
     case report
     when "Short in messagebox"
       UI.messagebox("#{total_count.length} component(s) were made unique")
@@ -194,12 +211,12 @@ module YorikTools::MakeUniquePlus
   unless file_loaded?(__FILE__)
       UI.add_context_menu_handler do |menu|
       selection = Sketchup.active_model.selection
-      definition = self.get_definition(selection[0])
+      definition = self.get_definition(selection.first)
       unless definition.nil?
-          sub_menu = menu.add_submenu(PLUGIN_NAME)
-          sub_menu.add_item("Only parent level"){ self.make_unique(selection, true) }
-          sub_menu.add_item("Choose nested level..."){ self.make_unique(selection, false) }
-        end
+        sub_menu = menu.add_submenu(PLUGIN_NAME)
+        sub_menu.add_item("Only parent level"){ self.make_unique(selection, true) }
+        sub_menu.add_item("Choose nested level..."){ self.make_unique(selection, false) }
+      end
     end
   end
 
