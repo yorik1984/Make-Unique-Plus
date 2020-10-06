@@ -9,7 +9,7 @@ Right click on component and/or group, or selected components and groups, and "M
 1. **_Only parent level_** - This will make unique all selected components without their nested levels. Any report or message are absent.
 2. **_Choose nested level..._** - This will make unique all selected components and their nested selected levels components.
 
-You can choose nested level from list. 2 level is parent. Report has three understandable options: 
+You can choose nested level from list. 2 level is parent. Report has three understandable options:
 
   * *Off*
   * *Short in messagebox*
@@ -25,7 +25,7 @@ CHANGELOG
 See [HISTORY](HISTORY.md)
 
 LICENSE
--------
+-------:q!
 
 Licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt).
 
@@ -44,8 +44,8 @@ Licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt).
 > GNU General Public License for more details.
 >
 > You should have received a copy of the GNU General Public License
-> along with Yorik Tools.  If not, see <http://www.gnu.org/licenses/>.
-> 
+	> along with Yorik Tools.  If not, see <http://www.gnu.org/licenses/>.
+>   >   
 
 ---
 Using parts of source code of honoluludesktop:

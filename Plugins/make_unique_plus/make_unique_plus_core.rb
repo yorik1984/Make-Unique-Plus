@@ -19,9 +19,10 @@
 # and plugin "Make Unique Selected Components" make_all_unique.rb
 # ------------------------------------------------------------------------------
 # License GPLv3
-# Version: 1.0
+# Version: 1.1
 # History:
 # - 1.0 Initial release 26-Jan-2017
+# - 1.1 Add convert unique to group
 # ------------------------------------------------------------------------------
 require "sketchup.rb"
 require "extensions.rb"
@@ -43,9 +44,9 @@ module YorikTools::MakeUniquePlus
     # @since 1.0
     def initialize
 
-      @prompts  = [ "Component nesting levels (biggest = All)", "Report" ]
-      @defaults = ["2", "Off" ]
-      @list     = ["", "Off|Short in messagebox|Full in console" ]
+      @prompts  = [ "Component nesting levels (biggest = All)", "Report", "Convert to group" ]
+      @defaults = ["2", "Off", "Off" ]
+      @list     = ["", "Off|Short in messagebox|Full in console","Off|On" ]
       @inputbox = []
     end
 
@@ -71,7 +72,8 @@ module YorikTools::MakeUniquePlus
         @inputbox = UI.inputbox(@prompts, @defaults, @list, "Make unique options")
       end
       input_labels = { :recursive => @inputbox[0],
-                          :report => @inputbox[1] }
+                          :report => @inputbox[1],
+                         :togroup => @inputbox[2] }
       return input_labels
     end
 
@@ -126,13 +128,29 @@ module YorikTools::MakeUniquePlus
   # @since 1.0
   def self.collect_uniq_components(selection,
                                    nested_level,
+                                   togroup,
                                    current_nested_level = 2,
                                    parent_list = [],
-                                   components_list = [])
+                                   components_list = [[],[]])
+    if togroup == "On"
+      puts togroup
+      selection.each do |entity|
+      puts "selection " + togroup
+        if entity.is_a?(Sketchup::ComponentInstance)
+          model = Sketchup.active_model
+          group = model.entities.add_group entity
+          group.name = entity.definition.name
+          entity.explode
+          model.selection.clear
+          entity = model.selection.add(group)
+        end
+      end
+    end
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
       if current_nested_level <= nested_level && entity.is_a?(Sketchup::ComponentInstance)
+
         separator = "  "
         if current_nested_level > 2
           for i in 3..current_nested_level
@@ -145,13 +163,14 @@ module YorikTools::MakeUniquePlus
         entity = entity.make_unique
         unique_component_name = "#{entity.definition.name}"
         if original_component_name != unique_component_name
-          components_list.push("#{level[0,3]}#{separator} " +
+          components_list[1].push("#{level[0,3]}#{separator} " +
               original_component_name + " => " +  unique_component_name)
 
         else
-          components_list.push("#{level[0,3]}#{separator} " +
+          components_list[1].push("#{level[0,3]}#{separator} " +
               original_component_name + " => " +  "NO CHANGE")
         end
+        components_list[0].push entity
       end
       if parent_list != [] && parent_list.include?(entity)
         current_nested_level += 1
@@ -159,7 +178,7 @@ module YorikTools::MakeUniquePlus
       end
       components_list =
           self.collect_uniq_components(entity.definition.entities, nested_level,
-              current_nested_level + 1, parent_list, components_list)
+              togroup, current_nested_level + 1, parent_list, components_list )
     end
     return components_list
   end # collect_uniq_components
@@ -173,13 +192,16 @@ module YorikTools::MakeUniquePlus
     make_unique_inputbox = LevelInputbox.new
     input = make_unique_inputbox.inputbox(selection, parent_level)
     model = Sketchup.active_model
+    break_edges_stat = Sketchup.break_edges?
+    Sketchup.break_edges = false
     active_path = model.active_path || []
     status = model.start_operation('Make unique', true)
     nested_level = input[:recursive].to_i
     report = input[:report].to_s
+    togroup = input[:togroup].to_s
     up_level = 0
     if active_path == []
-       total_count = self.collect_uniq_components(selection, nested_level)
+       total_count = self.collect_uniq_components(selection, nested_level, togroup)
     else
       up_level = active_path.size
       selected = selection.find_all{ |sel| !self.get_definition(sel).nil? }
@@ -187,20 +209,21 @@ module YorikTools::MakeUniquePlus
       active_path_parent = active_path
       full_list = active_path_parent + selected
       up_level.times { model.close_active }
-      total_count = self.collect_uniq_components(full_list, nested_level + up_level, 2, active_path)
+      total_count = self.collect_uniq_components(full_list, nested_level + up_level, togroup, 2, active_path)
     end
+
     case report
     when "Short in messagebox"
-      UI.messagebox("#{total_count.length} component(s) were made unique")
+      UI.messagebox("#{total_count[1].length} component(s) were made unique")
     when "Full in console"
       su_version_required = 14
       if Sketchup.version.to_f >= su_version_required
         SKETCHUP_CONSOLE.show if !SKETCHUP_CONSOLE.visible?
       end
       puts "========================================"
-      puts "#{total_count.length} component(s) were made unique"
+      puts "#{total_count[1].length} component(s) were made unique"
       puts "========================================"
-      puts total_count
+      puts total_count[1]
       puts "========================================"
     else
       nil
